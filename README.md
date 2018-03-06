@@ -1,4 +1,4 @@
-Examples from Udemy OpenGL class after being highly influenced by Cherno. This is a total mess with a few gems of hwo to make something work. Not meant for prime time.
+Examples from Udemy OpenGL class after being highly influenced by Cherno. This is a total mess with a few gems of how to make a few things work. Not meant for prime time.
 
 Like most of my github work, this is here for me.
 
