@@ -2,7 +2,9 @@
 //  Camera.h
 //  exampleOpenGL
 //
-//
+// This is TOTALLY Sonar Systems work
+// https://github.com/SonarSystems/Modern-OpenGL-Tutorials
+// I forgot to assign credit while dealing with build issues.
 
 #ifndef Camera_h
 #define Camera_h
