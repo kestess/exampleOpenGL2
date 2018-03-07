@@ -10,8 +10,6 @@ find_package (glfw3 REQUIRED)
 find_package (GLM REQUIRED)
 find_package (GLEW REQUIRED STATIC)
 
-#install(DIRECTORY res/ DESTINATION res)
-
 include_directories ( include ${OPENGL_INCLUDE_DIR} ${GLFW_INCLUDE_DIRS})
 
 include_directories(/usr/local/include)
@@ -21,12 +19,12 @@ find_library(COREVID_LIBRARY CoreVideo REQUIRED)
 
 add_executable(ogl ${SOURCES})
   target_link_libraries (ogl
-      #          ${GLFW3_LIBRARIES}
           glfw
           ${OPENGL_LIBRARIES}
           ${GLEW_LIBRARY}
           ${COCOA_LIBRARY} ${COREVID_LIBRARY} ${IOKIT_LIBRARY})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/vertex.shader DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/fragment.shader DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/tianjin_tower.jpg DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lamp.fs DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lamp.vs DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lighting.fs DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lighting.vs DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)

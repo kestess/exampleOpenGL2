@@ -115,11 +115,24 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     return program;
 }
 
+GLuint createProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) {
+
+    std::string vertexShader = getShader(vertexShaderPath);
+    std::string fragmentShader = getShader(fragmentShaderPath);
+    
+    std::cout << "shaders" << std::endl;
+    std::cout << vertexShader << std::endl;
+    std::cout << fragmentShader << std::endl;
+    
+    unsigned int shader = CreateShader(vertexShader, fragmentShader);
+    return shader;
+}
+
+
 const GLint WIDTH = 800, HEIGHT = 600;
 int SCREEN_WIDTH, SCREEN_HEIGHT;
 
 void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
-void ScrollCallback(GLFWwindow *window, double xOffset, double yOffset);
 void MouseCallback(GLFWwindow *window, double xPos, double yPos);
 void DoMovement();
 
@@ -130,6 +143,9 @@ GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 bool keys[1024];
 bool firstMouse = true;
+
+// Light attributes
+glm::vec3 lightPos( 1.2f, 1.0f, 2.0f );
 
 int main(int argc, const char * argv[]) {
 
@@ -157,7 +173,6 @@ int main(int argc, const char * argv[]) {
     
     glfwSetKeyCallback(window, KeyCallback);
     glfwSetCursorPosCallback(window, MouseCallback);
-    glfwSetScrollCallback(window, ScrollCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     glfwSwapInterval(1); // was smooth before this - might be the only thing that is automatic on a mac
@@ -175,118 +190,82 @@ int main(int argc, const char * argv[]) {
     
     glEnable(GL_DEPTH_TEST);
     
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glEnable(GL_BLEND);
+//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    GLuint lightingShader = createProgram("../res/lighting.vs", "../res/lighting.fs");
+    GLuint lampShader = createProgram("../res/lamp.vs", "../res/lamp.fs");
     
     GLfloat vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
         
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
         
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
         
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
         
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
         
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f
     };
     
-    glm::vec3 cubePositions[] =
-    {
-        glm::vec3( 0.0f, 0.0f, 0.0f ),
-        glm::vec3( 2.0f, 5.0f, -15.0f ),
-        glm::vec3( -1.5f, -2.2f, -2.5f ),
-        glm::vec3( -3.8f, -2.0f, -12.3f ),
-        glm::vec3( 2.4f, -0.4f, -3.5f ),
-        glm::vec3( -1.7f, 3.0f, -7.5f ),
-        glm::vec3( 1.3f, -2.0f, -2.5f ),
-        glm::vec3( 1.5f, 2.0f, -2.5f ),
-        glm::vec3( 1.5f, 0.2f, -1.5f ),
-        glm::vec3( -1.3f, 1.0f, -1.5f )
-    };
-    // apparently just an opengl construct
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    // VBO
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // index 0 of VAO is being bound to currently bound gl array buffer
-    // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (GLvoid *)0);
-    glEnableVertexAttribArray(0);
+    // First, set the container's VAO (and VBO)
+    GLuint VBO, boxVAO;
+    glGenVertexArrays( 1, &boxVAO );
+    glGenBuffers( 1, &VBO );
     
-    // texture
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (GLvoid *) (sizeof(float) * 3));
-    glEnableVertexAttribArray(2);
+    glBindBuffer( GL_ARRAY_BUFFER, VBO );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
     
-    glBindVertexArray(0);
-
-    GLuint texture;
-    int width, height, bpp;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindVertexArray( boxVAO );
+    // Position attribute
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), ( GLvoid * )0 );
+    glEnableVertexAttribArray( 0 );
+    glBindVertexArray( 0 );
     
-    // not using Cherno's stbi_set_flip_text_on_load since it's in the fragment shader
+    // Then, we set the light's VAO (VBO stays the same. After all, the vertices are the same for the light object (also a 3D cube))
+    GLuint lightVAO;
+    glGenVertexArrays( 1, &lightVAO );
+    glBindVertexArray( lightVAO );
+    // We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
+    glBindBuffer( GL_ARRAY_BUFFER, VBO );
+    // Set the vertex attributes (only position data for the lamp))
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), ( GLvoid * )0 );
+    glEnableVertexAttribArray( 0 );
+    glBindVertexArray( 0 );
     
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    unsigned char *image = stbi_load("../res/tianjin_tower.jpg", &width, &height, &bpp, 4);
-   
-    if (image) std::cout << "Image loaded." << std::endl;
-
-    GlCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image));
-    glBindTexture(GL_TEXTURE_2D, 0);
-    
-    if (image) stbi_image_free(image);
-  
-    std::string vertexShader = getShader("../res/vertex.shader");
-    std::string fragmentShader = getShader("../res/fragment.shader");
-    
-    std::cout << "shaders" << std::endl;
-    std::cout << vertexShader << std::endl;
-    std::cout << fragmentShader << std::endl;
-    
-    unsigned int shader = CreateShader(vertexShader, fragmentShader);
-    glUseProgram(shader); // this must be bound to use uniform
+    glm::mat4 projection = glm::perspective( camera.GetZoom( ), ( GLfloat )SCREEN_WIDTH / ( GLfloat )SCREEN_HEIGHT, 0.1f, 100.0f );
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -302,62 +281,61 @@ int main(int argc, const char * argv[]) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(glGetUniformLocation(shader, "ourTexture1"), 0);
         
-        glUseProgram(shader);
+        glUseProgram(lightingShader);
         
-        glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH/(GLfloat)SCREEN_HEIGHT, 0.1f, 1000.0f);
+        GLint objectColorLoc = glGetUniformLocation( lightingShader, "objectColor" );
+        GLint lightColorLoc  = glGetUniformLocation( lightingShader, "lightColor" );
+        glUniform3f( objectColorLoc, 1.0f, 0.5f, 0.31f );
+        glUniform3f( lightColorLoc,  1.0f, 0.5f, 1.0f );
         
-        
-//        glm::mat4 transform;
-//        transform = glm::translate(transform, glm::vec3(0.5f, -0.0f, 0.0f));
-//        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * -1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-//
-//        // probably just need to retrieve locations once.
-//        GlCall(glUniformMatrix4fv(glGetUniformLocation(shader, "u_MVP"), 1, GL_FALSE, glm::value_ptr(transform)));
-
-        glm::mat4 model;
+        // Create camera transformations
         glm::mat4 view;
-        // supposedly can replicate this line
-//        model = glm::rotate(model, (GLfloat)glfwGetTime() * 1.0f, glm::vec3(0.5f, 1.0f, 0.0f));
-//        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = camera.GetViewMatrix( );
         
-
-        view = camera.GetViewMatrix();
+        // Get the uniform locations
+        GLint modelLoc = glGetUniformLocation( lightingShader, "model" );
+        GLint viewLoc = glGetUniformLocation( lightingShader,  "view" );
+        GLint projLoc = glGetUniformLocation( lightingShader,  "projection" );
         
-        GLint modelLoc = glGetUniformLocation(shader, "model");
-        GLint viewLoc = glGetUniformLocation(shader, "view");
-        GLint projLoc = glGetUniformLocation(shader, "projection");
+        // Pass the matrices to the shader
+        glUniformMatrix4fv( viewLoc, 1, GL_FALSE, glm::value_ptr( view ) );
+        glUniformMatrix4fv( projLoc, 1, GL_FALSE, glm::value_ptr( projection ) );
         
-        // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        // Draw the container (using container's vertex attributes)
+        glBindVertexArray( boxVAO );
+        glm::mat4 model;
+        glUniformMatrix4fv( modelLoc, 1, GL_FALSE, glm::value_ptr( model ) );
+        glDrawArrays( GL_TRIANGLES, 0, 36 );
+        glBindVertexArray( 0 );
         
-        glBindVertexArray(VAO);
-
-        for (GLuint i = 0; i < 10; i++) {
-            glm::mat4 model;
-            model = glm::translate( model, cubePositions[i] );
-            GLfloat angle = 20.0f * i;
-            model = glm::rotate(model, angle, glm::vec3( 1.0f, 0.3f, 0.5f ) );
-            glUniformMatrix4fv( modelLoc, 1, GL_FALSE, glm::value_ptr( model ) );
-            
-            glDrawArrays( GL_TRIANGLES, 0, 36 );
-        }
+        glUseProgram(lampShader);
         
-        glBindVertexArray(0);
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
+        // Get location objects for the matrices on the lamp shader (these could be different on a different shader)
+        modelLoc = glGetUniformLocation( lampShader, "model" );
+        viewLoc = glGetUniformLocation( lampShader, "view" );
+        projLoc = glGetUniformLocation( lampShader, "projection" );
+        
+        // Set matrices
+        glUniformMatrix4fv( viewLoc, 1, GL_FALSE, glm::value_ptr( view ) );
+        glUniformMatrix4fv( projLoc, 1, GL_FALSE, glm::value_ptr( projection ) );
+        model = glm::mat4( );
+        model = glm::translate( model, lightPos );
+        model = glm::scale( model, glm::vec3( 0.2f ) ); // Make it a smaller cube
+        glUniformMatrix4fv( modelLoc, 1, GL_FALSE, glm::value_ptr( model ) );
+        
+        // Draw the light object (using light's vertex attributes)
+        glBindVertexArray( lightVAO );
+        glDrawArrays( GL_TRIANGLES, 0, 36 );
+        glBindVertexArray( 0 );
+        
+        // Swap the screen buffers
+        glfwSwapBuffers( window );
     }
     
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &buffer);
-    
-    glDeleteShader(shader);
+    glDeleteVertexArrays( 1, &boxVAO );
+    glDeleteVertexArrays( 1, &lightVAO );
+    glDeleteBuffers( 1, &VBO );
 
     glfwTerminate();
     return 0;
